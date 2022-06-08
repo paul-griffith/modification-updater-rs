@@ -69,7 +69,7 @@ impl ProjectResource {
             String::from(LAST_MODIFICATION),
             json!({
                 "actor": actor,
-                "timestamp": "2022-05-27T16:47:43Z".parse::<DateTime<Utc>>().unwrap().to_rfc3339_opts(SecondsFormat::Secs, true) //Utc::now().to_rfc3339()
+                "timestamp": Utc::now().to_rfc3339_opts(SecondsFormat::Secs, true)
             }),
         );
         // dbg!(to_sign.clone());
