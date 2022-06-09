@@ -1,6 +1,6 @@
+use chrono::Utc;
 use modification_updater::ProjectResource;
 use std::env;
-use chrono::Utc;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = env::args().collect();
