@@ -54,5 +54,19 @@ fn test_signature_calculation() {
     assert_eq!(
         signature,
         "7ea951abc0ddc97f549f41a5670b06aa513b30e189050159f40e207cfe502b02"
-    )
+    );
+
+    let resource = ProjectResource::from_path("tests/script2").unwrap();
+    let signature = resource.get_signature();
+    assert_eq!(
+        signature,
+        "aa5f6ff86772d32ddad86da18914f835769ccd49e3603e8aea63f5b2fcaf7b08"
+    );
+
+    let resource = ProjectResource::from_path("tests/view").unwrap();
+    let signature = resource.get_signature();
+    assert_eq!(
+        signature,
+        "1f2e193ab0b2be15cef750b100bf5c6906b7a92fbb5e7c4f8fb7b68e83b4eb89"
+    );
 }

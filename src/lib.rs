@@ -62,25 +62,20 @@ impl ProjectResource {
         calculate_content_digest(without_last_modification, self.data)
     }
 
-    pub fn update(self, actor: &str) -> ProjectResource {
+    pub fn update(self, actor: &str, timestamp: DateTime<Utc>) -> ProjectResource {
         let mut to_sign = self.manifest.attributes.clone();
         to_sign.remove(LAST_MODIFICATION_SIGNATURE);
         to_sign.insert(
             String::from(LAST_MODIFICATION),
             json!({
                 "actor": actor,
-                "timestamp": Utc::now().to_rfc3339_opts(SecondsFormat::Secs, true)
+                "timestamp": timestamp.to_rfc3339_opts(SecondsFormat::Secs, true)
             }),
         );
-        // dbg!(to_sign.clone());
         let intermediate_manifest = ResourceManifest {
             attributes: to_sign.clone(),
             ..self.manifest.clone()
         };
-        println!(
-            "{}",
-            serde_json::to_string_pretty(&intermediate_manifest).unwrap()
-        );
         let new_signature = calculate_content_digest(intermediate_manifest, self.data.clone());
         to_sign.insert(
             String::from(LAST_MODIFICATION_SIGNATURE),
@@ -116,7 +111,6 @@ impl ProjectResource {
 }
 
 fn calculate_content_digest(manifest: ResourceManifest, data: HashMap<String, Vec<u8>>) -> String {
-    // create a Sha256 object
     let mut hasher = Sha256::new();
 
     hasher.update(&(manifest.scope as i32).to_be_bytes());
@@ -133,7 +127,7 @@ fn calculate_content_digest(manifest: ResourceManifest, data: HashMap<String, Ve
     let files = manifest.files.iter().sorted();
     for key in files {
         hasher.update(key.as_bytes());
-        let data: &Vec<u8> = data.get(key).unwrap(); // TODO empty data is allowed
+        let data: &Vec<u8> = data.get(key).unwrap(); // TODO empty data should be allowed
         hasher.update(data)
     }
 
