@@ -1,0 +1,46 @@
+{
+  "scope": "DG",
+  "documentation": "nq\n",
+  "version": 2,
+  "restricted": false,
+  "overridable": true,
+  "files": [
+    "query.sql"
+  ],
+  "attributes": {
+    "useMaxReturnSize": false,
+    "autoBatchEnabled": false,
+    "fallbackValue": "abc",
+    "maxReturnSize": 100,
+    "cacheUnit": "SEC",
+    "type": "ScalarQuery",
+    "enabled": false,
+    "cacheAmount": 10,
+    "cacheEnabled": true,
+    "database": "sqlite",
+    "fallbackEnabled": true,
+    "lastModificationSignature": "834eca8162b3942191a05f3d53412af34ea77280f61a38a47c5ff9a6340cb909",
+    "permissions": [
+      {
+        "zone": "Default",
+        "role": "a, b, c"
+      }
+    ],
+    "lastModification": {
+      "actor": "qq",
+      "timestamp": "2022-06-10T22:55:49Z"
+    },
+    "parameters": [
+      {
+        "type": "Parameter",
+        "identifier": "myValueY",
+        "sqlType": 2
+      },
+      {
+        "type": "Parameter",
+        "identifier": "myValueA",
+        "sqlType": 7
+      }
+    ]
+  }
+}
