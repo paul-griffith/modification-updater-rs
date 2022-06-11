@@ -1,15 +1,12 @@
-use chrono::{DateTime, SecondsFormat, Utc};
+use chrono::{DateTime, Utc};
 use hex_fmt::HexFmt;
 use itertools::Itertools;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde_json::{json, Value};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, HashMap};
-use std::{fs, ops};
-use std::fmt::{Display, Formatter};
+use std::fs;
 use std::path::Path;
-use std::ptr::write;
-use chrono::format::Item;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[repr(i32)]
@@ -52,7 +49,10 @@ pub struct ResourceManifest {
 pub struct Attributes {
     #[serde(rename = "lastModification")]
     pub last_modification: LastModification,
-    #[serde(rename = "lastModificationSignature", skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "lastModificationSignature",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub last_modification_signature: Option<String>,
 
     #[serde(flatten)]
@@ -98,16 +98,20 @@ fn skip_serializing_false(field: &bool) -> bool {
 }
 
 mod ignition_date_format {
-    use chrono::{DateTime, Utc, TimeZone, SecondsFormat};
-    use serde::{self, Deserialize, Serializer, Deserializer};
+    use chrono::{DateTime, SecondsFormat, Utc};
+    use serde::{self, Deserialize, Deserializer, Serializer};
 
-    pub fn serialize<S>(date: &DateTime<Utc>, serializer: S, ) -> Result<S::Ok, S::Error>
-        where S: Serializer {
+    pub fn serialize<S>(date: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
         serializer.serialize_str(&date.to_rfc3339_opts(SecondsFormat::Secs, true))
     }
 
-    pub fn deserialize<'de, D>(deserializer: D, ) -> Result<DateTime<Utc>, D::Error>
-        where D: Deserializer<'de> {
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         let s = String::deserialize(deserializer)?;
         s.parse::<DateTime<Utc>>().map_err(serde::de::Error::custom)
     }
@@ -126,7 +130,7 @@ impl ProjectResource {
         let to_sign = Attributes {
             last_modification: self.manifest.attributes.last_modification,
             last_modification_signature: None,
-            attributes: self.manifest.attributes.attributes
+            attributes: self.manifest.attributes.attributes,
         };
         let without_last_modification = ResourceManifest {
             attributes: to_sign,
@@ -139,7 +143,7 @@ impl ProjectResource {
         let to_sign = Attributes {
             last_modification: modification.clone(),
             last_modification_signature: None,
-            attributes: self.manifest.attributes.attributes.clone()
+            attributes: self.manifest.attributes.attributes.clone(),
         };
         let intermediate_manifest = ResourceManifest {
             attributes: to_sign.clone(),
@@ -161,19 +165,18 @@ impl ProjectResource {
     }
 
     pub fn from_path(path: &Path) -> Result<ProjectResource, Box<dyn std::error::Error>> {
-        assert!(path.is_dir(), "Supplied path {} was not a directory", path.display());
+        assert!(
+            path.is_dir(),
+            "Supplied path {} was not a directory",
+            path.display()
+        );
         let resource_path = path.join("resource.json");
         let resource_file = fs::read(resource_path)?;
         let manifest: ResourceManifest = serde_json::from_slice(&resource_file)?;
         let data: HashMap<String, Vec<u8>> = manifest
             .files
             .iter()
-            .map(|data_key| {
-                (
-                    data_key.clone(),
-                    fs::read(path.join(data_key)).unwrap(),
-                )
-            })
+            .map(|data_key| (data_key.clone(), fs::read(path.join(data_key)).unwrap()))
             .collect();
         Ok(ProjectResource { manifest, data })
     }
